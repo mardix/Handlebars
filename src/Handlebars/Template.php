@@ -343,7 +343,7 @@ class Template
     private function variables(Context $context, $current, $escaped)
     {
         $name = $current[Tokenizer::NAME];
-        $value = $context->get($name);
+        $value = utf8_encode($context->get($name));
         if ($name == '@index') {
             return $context->lastIndex();
         }
