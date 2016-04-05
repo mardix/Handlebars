@@ -191,6 +191,11 @@ class HandlebarsTest extends \PHPUnit_Framework_TestCase
                 ["data" => "Hello World! How are you?"],
                 'Hello Wo...'
             ],
+			[
+                "{{#truncate data 8 '...'}}",
+                ["data" => "Hello"],
+                'Hello'
+            ],
             [
                 "{{#raw}}I'm raw {{data}}{{/raw}}",
                 ["data" => "raw to be included, but won't :)"],
