@@ -1,14 +1,8 @@
 [![Build Status](https://travis-ci.org/mardix/Handlebars.png?branch=master)](https://travis-ci.org/mardix/Handlebars)
 
----
-
 #Handlebars
 
----
-
 #### A simple, logic-less, yet powerful templating engine for PHP
-
----
 
 Name: **Handlebars**
 
@@ -17,9 +11,6 @@ License: MIT
 Version : 2.2.x
 
 Requirements: PHP >= 5.4
-
----
-
 
 ## About Handlebars
 
@@ -33,8 +24,6 @@ Handlebars, is the PHP port of [Handlebars.js](http://handlebarsjs.com/)
 
 Extended docs can be found at [VoodooPHP.org/docs/handlebars](http://voodoophp.org/docs/handlebars)
 
----
-
 ## Install Handlebars
 
 
@@ -42,44 +31,44 @@ You can just download Handlebars.php as is, or with Composer.
 
 To install with composer, add the following in the require key in your **composer.json** file
 
-	"voodoophp/handlebars": "2.*"
+```json
+"voodoophp/handlebars": "2.*"
+```
 
-composer.json
+#### Example composer.json
 
-
-	{
-	    "name": "myapp/name",
-	    "description": "My awesome app name",
-	    "require": {
-	        "voodoophp/handlebars": "2.*"
-	    }
-	}
-
------
+```json
+{
+    "name": "myapp/name",
+    "description": "My awesome app name",
+    "require": {
+        "voodoophp/handlebars": "2.*"
+    }
+}
+```
 
 ## Getting Started
 
 At the minimum, we are required to have an array model and a template string. Alternatively we can have a file containing handlebars (or html, text, etc) expression.
 
-
-
-#### Template
+### Template
 
 Handlebars templates look like regular HTML, with embedded handlebars expressions.
 
 Handlebars HTML-escapes values returned by a {{expression}}.
 
-		<div class="entry">
-		  <h1>{{title}}</h1>
-		  <div class="body">
-		    Hello, my name is {{name}}
-		  </div>
-		</div>
-
+```html
+<div class="entry">
+  <h1>{{title}}</h1>
+  <div class="body">
+    Hello, my name is {{name}}
+  </div>
+</div>
+```
 
 The string above can be used as is in your PHP file, or be put in a file (ie: */templates/main.tpl*), to be called upon rendering.
 
-#### PHP file
+### PHP file
 
 Now the we've created our template file, in a php file (index.php) we'll create the data to passed to the model. The model is a key/value array.
 
@@ -87,65 +76,67 @@ Below we are going to create the Handlebars object, set the partials loader, and
 
 **/index.php**
 
-	<?php
-		# With composer we can autoload the Handlebars package
-		require_once ("./vendor/autoload.php");
+```php
+<?php
 
-		# If not using composer, you can still load it manually.
-		# require 'src/Handlebars/Autoloader.php';
-		# Handlebars\Autoloader::register();
+# With composer we can autoload the Handlebars package
+require_once ("./vendor/autoload.php");
 
-		use Handlebars\Handlebars;
-		use Handlebars\Loader\FilesystemLoader;
+# If not using composer, you can still load it manually.
+# require 'src/Handlebars/Autoloader.php';
+# Handlebars\Autoloader::register();
 
-		# Set the partials files
-		$partialsDir = __DIR__."/templates"
-		$partialsLoader = new FilesystemLoader($partialsDir,
-												[
-													"extension" => "html"
-												]
-											);
+use Handlebars\Handlebars;
+use Handlebars\Loader\FilesystemLoader;
 
-		# We'll use $handlebars thoughout this the examples, assuming the will be all set this way
-		$handlebars = new Handlebars([
-						"loader" => $partialsLoader,
-						"partials_loader" => $partialsLoader
-					]);
+# Set the partials files
+$partialsDir = __DIR__."/templates"
+$partialsLoader = new FilesystemLoader($partialsDir, [
+	"extension" => "html"
+]);
 
-		# Will render the model to the templates/main.tpl template
-		echo $handlebars->render("main", $model);
+# We'll use $handlebars thoughout this the examples, assuming the will be all set this way
+$handlebars = new Handlebars([
+	"loader" => $partialsLoader,
+	"partials_loader" => $partialsLoader
+]);
 
+# Will render the model to the templates/main.tpl template
+echo $handlebars->render("main", $model);
+```
 
-#### Assign Data
+### Assign Data
 
 The simplest way to assign data is to create an Array model. The model will contain all the data that will be passed to the template.
 
-	<?php
+```php
+<?php
 
-	$model = [
-		"name" => "Mardix",
-		"title" => "I'm Title",
-        "permalink" => "blog/",
-		"foo" => "bar",
-		"article" => [
-			"title" => "My Article Title"
+$model = [
+	"name" => "Mardix",
+	"title" => "I'm Title",
+	"permalink" => "blog/",
+	"foo" => "bar",
+	"article" => [
+		"title" => "My Article Title"
+	],
+	"posts" => [
+		[
+			"title" => "Post #1",
+			"id" => 1,
+			"content" => "Content"
 		],
-		"posts" => [
-            [
-                "title" => "Post #1",
-                "id" => 1,
-                "content" => "Content"
-            ],
-            [
-                "title" => "Post 2",
-                "id" => 2,
-                "content" => "Content"
-            ]
+		[
+			"title" => "Post 2",
+			"id" => 2,
+			"content" => "Content"
 		]
-	];
+	]
+];
+```
 
 
-#### Render Template
+### Render Template
 
 Use the method `Handlebars\Handlebars::render($template, $model)` to render you template once everything is created.
 
@@ -155,94 +146,136 @@ Use the method `Handlebars\Handlebars::render($template, $model)` to render you 
 
 The code below will render the model to the *templates/main.tpl* template
 
-		echo $handlebars->render("main", $model);
-
+```php
+echo $handlebars->render("main", $model);
+```
 
 Alternatively you can use $handlebars itself without invoking the render method
 
-		echo $handlebars("main", $model);
-
+```php
+echo $handlebars("main", $model);
+```
 
 ---
 
-## Expressions
+# Basic Templating
 
 Let's use this simple model for the following examples, assuming everything is already set like above.
 
-	<?php
+```php
+<?php
 
-	$model = [
-		"title" => "I'm Title",
-                "permalink" => "/blog/",
-		"foo" => "bar",
-		"article" => [
-			"title" => "My Article Title"
-		],
-		"posts" => [
-            [
-                "title" => "Post #1",
-                "id" => 1,
-                "content" => "Content"
-            ],
-            [
-                "title" => "Post 2",
-                "id" => 2,
-                "content" => "Content"
-            ]
-		]
-	];
+$model = [
+	"title" => "I'm Title",
+        "permalink" => "/blog/",
+	"foo" => "bar",
+	"article" => [
+		"title" => "My Article Title"
+	],
+	"posts" => [
+	        [
+		        "title" => "Post #1",
+		        "id" => 1,
+		        "content" => "Content"
+	        ],
+	        [
+		        "title" => "Post 2",
+		        "id" => 2,
+		        "content" => "Content"
+	    	]
+	]
+];
+```
 
-Let's work with the template.
+## Let's work with the template.
 
 Handlebars expressions are the basic unit of a Handlebars template. You can use them alone in a {{mustache}}, pass them to a Handlebars helper, or use them as values in hash arguments.
 
 
+### Basic Expressions
+
 The simplest Handlebars expression is a simple identifier:
 
-	{{title}}
+```
+{{title}}
+```
 
-	-> I'm Title
+will become
+
+```
+I'm Title
+```
+
+### Nested Expressions
 
 Handlebars nested expressions which are dot-separated paths.
 
-	{{article.title}}
+```
+{{article.title}}
+```
 
-	-> My Article Title
+will become
 
-Handlebars nested expressions in an array.
+```
+My Article Title
+```
 
-	{{posts.0.title}}
+##### Handlebars nested expressions in an array.
 
-	-> Post #1
+```
+{{posts.0.title}}
+```
 
+will become
+
+```
+Post #1
+```
+
+### Conflict Resolution
 
 Handlebars also allows for name conflict resolution between helpers and data fields via a this reference:
 
-	{{./name}} or {{this/name}} or {{this.name}}
+```
+{{./name}} or {{this/name}} or {{this.name}}
+```
 
+### Helpers
 
 Handlebars expressions with a helper. In this case we're using the upper helper
 
-	{{#upper title}}
+```
+{{#upper title}}
+```
 
-	-> I'M TITLE
+will become
 
+```
+I'M TITLE
+```
+
+### Nested Backwards Expressions
 
 Nested handlebars paths can also include ../ segments, which evaluate their paths against a parent context.
 
-	{{#each posts}}
-		<a href="/posts/{{../permalink}}/{{id}}">{{title}}</a>
-		{{content}}
-	{{/each}}
+```html
+{{#each posts}}
+	<a href="/posts/{{../permalink}}/{{id}}">{{title}}</a>
+	{{content}}
+{{/each}}
+```
 
+### Counter-Escaping Outputs
 
 Handlebars HTML-escapes values returned by a {{expression}}. If you don't want Handlebars to escape a value, use the "triple-stash", {{{ }}}
 
-	{{{foo}}}
-
+```
+{{{foo}}}
+```
 
 ---
 
+# More Templating
 
 ## Control Structures
 
@@ -254,110 +287,113 @@ You can use the if helper to conditionally render a block. If its argument retur
 
 **Example**
 
+```php
 
-	{{#if isActive}}
-		This part will be shown if it is active
-	{{else}}
-		This part will not show if isActive is true
-	{{/if}}
+$template = <<<HBS
+{{#if isActive}}
+	This part will be shown if it is active
+{{else}}
+	This part will not show if isActive is true
+{{/if}}
+HBS;
 
+$model = [
+	"isActive" => true
+];
 
-	<?php
-
-	$model = [
-		"isActive" => true
-	];
-
-	echo $handlebars->render($template, $model)
-
+echo $handlebars->render($template, $model)
+```
 
 ### UNLESS
 
 You can use the unless helper as the inverse of the if helper. Its block will be rendered if the expression returns a falsy value.
 
+```html
+{{#unless isActive}}
+	This part will not show if isActive is true
+{{/unless}}
+```
 
-	{{#unless isActive}}
-		This part will not show if isActive is true
-	{{/unless}}
-
-
----
-##Iterators: EACH
+## Iterators: EACH
 
 You can iterate over a list using the built-in each helper. Inside the block, you can use {{this}} or {{.}} to reference the element being iterated over.
 
 **Example**
 
-	<?php
-        $model = [
-            "genres" => [
-                "Hip-Hop",
-                "Rap",
-                "Techno",
-                "Country"
-            ],
-            "cars" => [
-                "category" => "Foreign",
-                "count" => 4,
-                "list" => [
-                    "Toyota",
-                    "Kia",
-                    "Honda",
-                    "Mazda"
-                ],
-                "category" => "WTF",
-                "count" => 1,
-                "list" => [
-                    "Fiat"
-                ],
-                "category" => "Luxury",
-                "count" => 2,
-                "list" => [
-                    "Mercedes Benz",
-                    "BMW"
-                ],
-                "category" => "Rich People Shit",
-                "count" => 3,
-                "list" => [
-                    "Ferrari",
-                    "Bugatti",
-                    "Rolls Royce"
-                ]
-            ],
-        ];
+```php
+<?php
+
+$template = <<<HBS
+<h2>All genres:</h2>
+{{#each genres}}
+    {{.}}
+{{/each}}
 
 
-			<h2>All genres:</h2>
-			{{#each genres}}
-			    {{.}}
-			{{/each}}
+{{#each cars}}
+    <h3>{{category}}</h3>
+    Total: {{count}}
+    <ul>
+        {{#each list}}
+            {{.}}
+        {{/each}}
+    </ul>
+{{/each}}
+HBS;
 
+$model = [
+    "genres" => [
+        "Hip-Hop",
+        "Rap",
+        "Techno",
+        "Country"
+    ],
+    "cars" => [
+        "category" => "Foreign",
+        "count" => 4,
+        "list" => [
+            "Toyota",
+            "Kia",
+            "Honda",
+            "Mazda"
+        ],
+        "category" => "WTF",
+        "count" => 1,
+        "list" => [
+            "Fiat"
+        ],
+        "category" => "Luxury",
+        "count" => 2,
+        "list" => [
+            "Mercedes Benz",
+            "BMW"
+        ],
+        "category" => "Rich People Shit",
+        "count" => 3,
+        "list" => [
+            "Ferrari",
+            "Bugatti",
+            "Rolls Royce"
+        ]
+    ],
+];
 
-			{{#each cars}}
-			    <h3>{{category}}</h3>
-			    Total: {{count}}
-			    <ul>
-			        {{#each list}}
-			            {{.}}
-			        {{/each}}
-			    </ul>
-			{{/each}}
-		";
-
-		echo $engine->render($template, $model)
+echo $engine->render($template, $model)
+```
 
 
 ### EACH/ELSE
 
 You can optionally provide an {{else}} section which will display only when the list is empty.
 
-		<h2>All genres:</h2>
-		{{#each genres}}
-		    {{.}}
-		{{else}}
-			No genres found!
-		{{/each}}
-
+```html
+<h2>All genres:</h2>
+{{#each genres}}
+        {{.}}
+{{else}}
+	No genres found!
+{{/each}}
+```
 
 
 ### Slice EACH Array[start:end]
@@ -372,61 +408,65 @@ The #each helper (php only) also has the ability to slice the data
  * {{#each Array[-2:]}} = Last two items
  * {{#each Array[:-2]}} = Everything except last two items
 
-
-		<h2>All genres:</h2>
-		{{#each genres[0:10]}}
-		    {{.}}
-		{{else}}
-			No genres found!
-		{{/each}}
-
+```html
+<h2>All genres:</h2>
+{{#each genres[0:10]}}
+    {{.}}
+{{else}}
+	No genres found!
+{{/each}}
+```
 
 #### {{@INDEX}} and {{@KEY}}
 
 When looping through items in each, you can optionally reference the current loop index via {{@index}}
 
-	{{#each array}}
-	  {{@index}}: {{this}}
-	{{/each}}
+```
+{{#each array}}
+  {{@index}}: {{this}}
+{{/each}}
+```
 
+```
+{{#each object}}
+  {{@key}}: {{this}}
+{{/each}}
+```
 
-	{{#each object}}
-	  {{@key}}: {{this}}
-	{{/each}}
-
-
-
-
----
 
 ## Change Context: WITH
 
-You can shift the context for a section of a template by using the built-in with block helper.
+You can shift the context for a section of a template by using the built-in `with` block helper.
 
-	<?php
-        $model = [
-            "genres" => [
-                "Hip-Hop",
-                "Rap",
-                "Techno",
-                "Country"
-            ],
-			"other_genres" => [
-	            "genres" => [
-	                "Hip-Hop",
-	                "Rap",
-	                "Techno",
-	                "Country"
-	            ]
-			]
-		];
+```php
+<?php
 
-		<h2>All genres:</h2>
-	    {{#with other_genres}}
-	        {{#each genres}}
-	            {{.}}
-	        {{/each}}
-	    {{/with}}
+$template = <<<HBS
+<h2>All genres:</h2>
+{{#with other_genres}}
+	{{#each genres}}
+    		{{.}}
+	{{/each}}
+{{/with}}
+HBS;
+
+$model = [
+    	"genres" => [
+	        "Hip-Hop",
+	        "Rap",
+	        "Techno",
+	        "Country"
+       ],
+	"other_genres" => [
+            	"genres" => [
+        	    	"Hip-Hop",
+                	"Rap",
+                	"Techno",
+                	"Country"
+        	]
+	]
+];
+```
 
 ---
 
@@ -434,182 +474,216 @@ You can shift the context for a section of a template by using the built-in with
 
 ### If
 
-		{{#if isActive}}
-			This part will be shown if it is active
-		{{else}}
-			This part will not show if isActive is true
-		{{/if}}
+```html
+{{#if isActive}}
+	This part will be shown if it is active
+{{else}}
+	This part will not show if isActive is true
+{{/if}}
+```
 
 ### Unless
-		{{#unless isActive}}
-			This part will show when isActive is false
-                {{else}}
-                        Otherwise this one will show
-		{{/unless}}
+
+```html
+{{#unless isActive}}
+	This part will show when isActive is false
+{{else}}
+        Otherwise this one will show
+{{/unless}}
+```
 
 ### Each
-		{{#each genres[0:10]}}
-		    {{.}}
-		{{else}}
-			No genres found!
-		{{/each}}
+
+```html
+{{#each genres[0:10]}}
+    {{.}}
+{{else}}
+	No genres found!
+{{/each}}
+```
 
 ### With
 
-	    {{#with other_genres}}
-	        {{#each genres}}
-	            {{.}}
-	        {{/each}}
-	    {{/with}}
-
----
+```html
+{{#with other_genres}}
+{{#each genres}}
+    {{.}}
+{{/each}}
+{{/with}}
+```
 
 ## Other Helpers
 
-#### For convenience, Voodoo\Handlebars added some extra helpers.
-
----
+For convenience, Voodoo\Handlebars added some extra helpers.
 
 ### Upper
 
 To format string to uppercase
 
-	{{#upper title}}
+```
+{{#upper title}}
+```
 
 ### Lower
 
 To format string to lowercase
 
-	{{#lower title}}
-
+```
+{{#lower title}}
+```
 
 ### Capitalize
 
 To capitalize the first letter
 
-	{{#capitalize title}}
+```
+{{#capitalize title}}
+```
 
 ### Capitalize_Words
 
 To capitalize each words in a string
 
-	{{#capitalize_words title}}
+```
+{{#capitalize_words title}}
+```
 
 ### Reverse
 
 To reverse the order of string
 
-	{{#reverse title}}
+```
+{{#reverse title}}
+```
 
 ### Format_Date
 
 To format date: `{{#format_date date '$format'}}`
 
-	{{#format_date date 'Y-m-d H:i:s'}}
-
+```
+{{#format_date date 'Y-m-d H:i:s'}}
+```
 
 ### Inflect
 
 To singularize or plurialize words based on count `{{#inflect count $singular $plurial}}`
 
-	{{#inflect count '%d book' '%d books'}}
-
+```
+{{#inflect count '%d book' '%d books'}}
+```
 
 ### Truncate
 
 To truncate a string: `{{#truncate title $length $ellipsis}}`
 
-	{{#truncate title 21 '...'}}
-
+```
+{{#truncate title 21 '...'}}
+```
 
 ### Default
 
 To use a default value if  the string is empty: `{{#default title $defaultValue}}`
 
-	{{#default title 'No title'}}
-
-
+```
+{{#default title 'No title'}}
+```
 
 ### Raw
 
 This helper return handlebars expression as is. The expression will not be parsed
 
-	{{#raw}}
-		{{#each cars}}
-			{{model}}
-		{{/each}}
-	{{/raw}}
-
-->
-
+```
+{{#raw}}
 	{{#each cars}}
 		{{model}}
 	{{/each}}
+{{/raw}}
+```
 
+will become
+
+```
+{{#each cars}}
+	{{model}}
+{{/each}}
+```
 
 ### Repeat
 
 To truncate a string: `{{#repeat $count}}{{/repeat}}`
 
-        {{#repeat 5}}
-            Hello World!
-        {{/repeat}}
+```
+{{#repeat 5}}
+    Hello World!
+{{/repeat}}
+```
 
 Variable and blocks can still be used
 
-        {{#repeat 5}}
-            Hello {{name}}!
-        {{/repeat}}
-
+```
+{{#repeat 5}}
+    Hello {{name}}!
+{{/repeat}}
+```
 
 ### Define/Invoke
 
 Allow to define a block of content and use it later. It helps follow the DRY (Don't repeat yourself) principle.
 
 
-Define
+#### Define
 
-        {{#define $definedName}}
-            content
-        {{/define}}
+```
+{{#define $definedName}}
+    content
+{{/define}}
+```
 
-Invoke
+#### Invoke
 
-        {{#invoke $definedName}}
+```
+{{#invoke $definedName}}
+```
 
+### Example:
 
-Example:
+```
+{{#define hello}}
+    Hello World! How do you do?
+{{/define}}
 
-        {{#define hello}}
-            Hello World! How do you do?
-        {{/define}}
+{{#invoke hello}}
+```
 
-        {{#invoke hello}}
+will become
 
-->
-
-        Hello World! How do you do?
+```html
+Hello World! How do you do?
+```
 
 ---
 
-### Template Comments
+## Template Comments
+
 You can use comments in your handlebars code just as you would in your code. Since there is generally some level of logic, this is a good practice.
 
-	{{!-- only output this author names if an author exists --}}
+```
+{{!-- only output this author names if an author exists --}}
+```
 
----
 
-### Partials
+## Partials
 
 Partials are other templates you can include inside of the main template.
 
 To do so:
 
-	{{> my_partial}}
+```
+{{> my_partial}}
+```
 
 which is a file under /templates/my_partial.html
 
----
 
 ## Writing your own helpers
 
@@ -619,25 +693,24 @@ To create your own helper, use the method: `Handlebars::addHelper($name, $callba
 
 The following helper will UPPERCASE a string
 
-	$handlebars->addHelper("upper",
-                                function($template, $context, $args, $source){
-                                    return strtoupper($context->get($args));
-	                    	}
-                            );
+```php
+$handlebars->addHelper("upper", function($template, $context, $args, $source) {
+        return strtoupper($context->get($args));
+});
+```
 
 And now we can use the helper like this:
 
-	{{#upper title}}
+```
+{{#upper title}}
+```
 
 ---
-
-
 
 #### Who's using Handlebars
 
 
 * [VoodooPHP](http://voodoophp.org)
-
 
 
 #### Credits
@@ -654,8 +727,6 @@ Contributions are more than welcome, just don't forget to:
  * Add your name to each file that you edit as author
 
  * Use PHP CodeSniffer to check coding style.
-
----
 
 ####License
 
