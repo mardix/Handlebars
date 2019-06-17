@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class AutoloaderTest
  */
-class HandlebarsTest extends \PHPUnit_Framework_TestCase
+class HandlebarsTest extends TestCase
 {
     /**
      * Test handlebars autoloader
