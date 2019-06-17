@@ -8,6 +8,8 @@ use PHPUnit\Framework\TestCase;
  */
 class HandlebarsTest extends TestCase
 {
+	private $useTideways = true;
+
 	/**
 	 * Test handlebars autoloader
 	 *
@@ -49,17 +51,33 @@ class HandlebarsTest extends TestCase
 	/**
 	 * Stress test case 1.
 	 *
+	 * Unmodified run times:
+	 * 28.007927894592 ms
+	 * 30.679718017578 ms
+	 * 28.822145938873 ms
+	 * 27.446083068848 ms
+	 * 27.266141891479 ms
+	 * 28.384800195694 ms
+	 *
+	 * With Hacked in Change:
+	 * 26.630587816238 ms
+	 * 26.888450860977 ms
+	 *
 	 * @test
 	 */
 	public function stressTest1()
 	{
-		$timesToRun = 10000;
+		//$timesToRun = 100000;
+		$timesToRun = 1;
 
 		$loader = new \Handlebars\Loader\StringLoader();
 		$engine = new \Handlebars\Handlebars(array('loader' => $loader));
 
 		$stressTestCase = $this->loadTestCase(__DIR__ . '/../fixture/testCases/case1');
 
+		if ($this->useTideways) {
+			tideways_enable();
+		}
 		$startTime = microtime(true);
 		while ($timesToRun-- > 0) {
 			$result = $engine->render(
@@ -68,6 +86,15 @@ class HandlebarsTest extends TestCase
 			);
 		}
 		$endTime = microtime(true);
+
+		if ($this->useTideways) {
+			$data = tideways_disable();
+			file_put_contents(
+				"/tmp/xhprof/" . uniqid() . ".debug.xhprof",
+				serialize($data)
+			);
+		}
+
 
 		echo 'Total Time: ' . ($endTime - $startTime) . ' ms' . "\n";
 
@@ -123,6 +150,11 @@ class StressTestCase
 
 		$lines = explode("\n", $this->dataContent);
 		foreach ($lines as $line) {
+			// Skip blank lines
+			if (strlen(trim($line)) === 0) {
+				continue;
+			}
+
 			$bits = explode("=", $line);
 			$this->assignArrayByPath($this->parsedData, $bits[0], $bits[1], '.');
 		}
