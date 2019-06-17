@@ -67,7 +67,10 @@ class HandlebarsTest extends TestCase
 	 */
 	public function stressTest1()
 	{
+		$validateResults = false;
+
 		$timesToRun = 10000;
+		//$timesToRun = 1;
 
 		$loader = new \Handlebars\Loader\StringLoader();
 		$engine = new \Handlebars\Handlebars(array('loader' => $loader));
@@ -79,10 +82,12 @@ class HandlebarsTest extends TestCase
 		}
 		$startTime = microtime(true);
 		while ($timesToRun-- > 0) {
-//			$result = $engine->render(
-//				$stressTestCase->getSrcContent(),
-//				$stressTestCase->getData()
-//			);
+//			if ($validateResults) {
+//				$result = $engine->render(
+//					$stressTestCase->getSrcContent(),
+//					$stressTestCase->getData()
+//				);
+//			}
 			$tokens =$engine->getTokenizer()->scan($stressTestCase->getSrcContent());
 		}
 		$endTime = microtime(true);
@@ -102,7 +107,9 @@ class HandlebarsTest extends TestCase
 
 
 		// validate result.
-		//$this->assertEquals($stressTestCase->getExpectedResult(), $result);
+		if ($validateResults) {
+			$this->assertEquals($stressTestCase->getExpectedResult(), $result);
+		}
 	}
 
 	private function loadTestCase(string $path) : StressTestCase
