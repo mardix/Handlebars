@@ -95,6 +95,7 @@ class Tokenizer
         if ($text instanceof HandlebarsString) {
             $text = $text->getString();
         }
+
         $this->reset();
 
         if ($delimiters = trim($delimiters)) {
@@ -103,99 +104,116 @@ class Tokenizer
             $this->ctag = $ctag;
         }
 
+        $openingTagLength = strlen($this->otag);
+        $closingTagLength = strlen($this->ctag);
+        $firstOpeningTagCharacter = $this->otag[0];
+        $firstClosingTagCharacter = $this->ctag[0];
+
         $len = strlen($text);
+
         for ($i = 0; $i < $len; $i++) {
+
+            $character = $text[$i];
+
             switch ($this->state) {
-            case self::IN_TEXT:
-                if ($this->tagChange($this->otag, $text, $i)) {
-                    $i--;
-                    $this->flushBuffer();
-                    $this->state = self::IN_TAG_TYPE;
-                } else {
-                    if ($text[$i] == "\n") {
-                        $this->filterLine();
+
+                case self::IN_TEXT:
+                    if ($character === $firstOpeningTagCharacter && $this->tagChange($this->otag, $text, $i, $openingTagLength)
+                    ) {
+                        $i--;
+                        $this->flushBuffer();
+                        $this->state = self::IN_TAG_TYPE;
                     } else {
-                        $this->buffer .= $text[$i];
-                    }
-                }
-                break;
-
-            case self::IN_TAG_TYPE:
-
-                $i += strlen($this->otag) - 1;
-                if (isset($this->tagTypes[$text[$i + 1]])) {
-                    $tag = $text[$i + 1];
-                    $this->tagType = $tag;
-                } else {
-                    $tag = null;
-                    $this->tagType = self::T_ESCAPED;
-                }
-
-                if ($this->tagType === self::T_DELIM_CHANGE) {
-                    $i = $this->changeDelimiters($text, $i);
-                    $this->state = self::IN_TEXT;
-                } else {
-                    if ($tag !== null) {
-                        $i++;
-                    }
-                    $this->state = self::IN_TAG;
-                }
-                $this->seenTag = $i;
-                break;
-
-            default:
-                if ($this->tagChange($this->ctag, $text, $i)) {
-                    // Sections (Helpers) can accept parameters
-                    // Same thing for Partials (little known fact)
-                    if (in_array($this->tagType, [
-                                    self::T_SECTION,
-                                    self::T_PARTIAL,
-                                    self::T_PARTIAL_2]
-                            )) {
-                        $newBuffer = explode(' ', trim($this->buffer), 2);
-                        $args = '';
-                        if (count($newBuffer) == 2) {
-                            $args = $newBuffer[1];
-                        }
-                        $this->buffer = $newBuffer[0];
-                    }
-                    $t = [
-                        self::TYPE => $this->tagType,
-                        self::NAME => trim($this->buffer),
-                        self::OTAG => $this->otag,
-                        self::CTAG => $this->ctag,
-                        self::INDEX => ($this->tagType == self::T_END_SECTION) ?
-                            $this->seenTag - strlen($this->otag) :
-                            $i + strlen($this->ctag),
-                    ];
-                    if (isset($args)) {
-                        $t[self::ARGS] = $args;
-                    }
-                    $this->tokens[] = $t;
-                    unset($t);
-                    unset($args);
-                    $this->buffer = '';
-                    $i += strlen($this->ctag) - 1;
-                    $this->state = self::IN_TEXT;
-                    if ($this->tagType == self::T_UNESCAPED) {
-                        if ($this->ctag == '}}') {
-                            $i++;
+                        if ($character == "\n") {
+                            $this->filterLine();
                         } else {
-                            // Clean up `{{{ tripleStache }}}` style tokens.
-                            $lastIndex = count($this->tokens) - 1;
-                            $lastName = $this->tokens[$lastIndex][self::NAME];
-                            if (substr($lastName, -1) === '}') {
-                                $this->tokens[$lastIndex][self::NAME] = trim(
-                                    substr($lastName, 0, -1)
-                                );
+                            $this->buffer .= $character;
+                        }
+                    }
+                    break;
+
+                case self::IN_TAG_TYPE:
+
+                    $i += $openingTagLength - 1;
+                    if (isset($this->tagTypes[$text[$i + 1]])) {
+                        $tag = $text[$i + 1];
+                        $this->tagType = $tag;
+                    } else {
+                        $tag = null;
+                        $this->tagType = self::T_ESCAPED;
+                    }
+
+                    if ($this->tagType === self::T_DELIM_CHANGE) {
+                        $i = $this->changeDelimiters($text, $i);
+                        $openingTagLength = strlen($this->otag);
+                        $closingTagLength = strlen($this->ctag);
+                        $firstOpeningTagCharacter = $this->otag[0];
+                        $firstClosingTagCharacter = $this->ctag[0];
+
+                        $this->state = self::IN_TEXT;
+                    } else {
+                        if ($tag !== null) {
+                            $i++;
+                        }
+                        $this->state = self::IN_TAG;
+                    }
+                    $this->seenTag = $i;
+                    break;
+
+                default:
+                    if ($character === $firstClosingTagCharacter && $this->tagChange($this->ctag, $text, $i, $closingTagLength)) {
+                        // Sections (Helpers) can accept parameters
+                        // Same thing for Partials (little known fact)
+                        if (in_array($this->tagType, [
+                                self::T_SECTION,
+                                self::T_PARTIAL,
+                                self::T_PARTIAL_2]
+                        )) {
+                            $newBuffer = explode(' ', trim($this->buffer), 2);
+                            $args = '';
+                            if (count($newBuffer) == 2) {
+                                $args = $newBuffer[1];
+                            }
+                            $this->buffer = $newBuffer[0];
+                        }
+                        $t = [
+                            self::TYPE => $this->tagType,
+                            self::NAME => trim($this->buffer),
+                            self::OTAG => $this->otag,
+                            self::CTAG => $this->ctag,
+                            self::INDEX => ($this->tagType == self::T_END_SECTION) ?
+                                $this->seenTag - $openingTagLength :
+                                $i + strlen($this->ctag),
+                        ];
+                        if (isset($args)) {
+                            $t[self::ARGS] = $args;
+                        }
+                        $this->tokens[] = $t;
+                        unset($t);
+                        unset($args);
+                        $this->buffer = '';
+                        $i += strlen($this->ctag) - 1;
+                        $this->state = self::IN_TEXT;
+                        if ($this->tagType == self::T_UNESCAPED) {
+                            if ($this->ctag == '}}') {
+                                $i++;
+                            } else {
+                                // Clean up `{{{ tripleStache }}}` style tokens.
+                                $lastIndex = count($this->tokens) - 1;
+                                $lastName = $this->tokens[$lastIndex][self::NAME];
+                                if (substr($lastName, -1) === '}') {
+                                    $this->tokens[$lastIndex][self::NAME] = trim(
+                                        substr($lastName, 0, -1)
+                                    );
+                                }
                             }
                         }
+                    } else {
+                        $this->buffer .= $character;
                     }
-                } else {
-                    $this->buffer .= $text[$i];
-                }
-                break;
+                    break;
             }
+
         }
 
         $this->filterLine(true);
@@ -320,15 +338,16 @@ class Tokenizer
     /**
      * Test whether it's time to change tags.
      *
-     * @param string $tag   Current tag name
-     * @param string $text  Mustache template source
-     * @param int    $index Current tokenizer index
+     * @param string $tag Current tag name
+     * @param string $text Mustache template source
+     * @param int $index Current tokenizer index
+     * @param int $tagLength Length of the opening/closing tag string
      *
      * @return boolean True if this is a closing section tag
      */
-    protected function tagChange($tag, $text, $index)
+    protected function tagChange($tag, $text, $index, $tagLength)
     {
-        return substr($text, $index, strlen($tag)) === $tag;
+        return substr($text, $index, $tagLength) === $tag;
     }
 
 }
